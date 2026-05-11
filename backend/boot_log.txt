@@ -1,0 +1,135 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< fr.univ.iam:moteur-iam >-----------------------
+[INFO] Building moteur-iam 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.0.5:run (default-cli) > test-compile @ moteur-iam >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ moteur-iam ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ moteur-iam ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ moteur-iam ---
+[INFO] skip non existing resourceDirectory /home/jdidi/iam/backend/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ moteur-iam ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:4.0.5:run (default-cli) < test-compile @ moteur-iam <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.0.5:run (default-cli) @ moteur-iam ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-04T10:11:25.148+02:00  INFO 4186203 --- [moteur-iam] [           main] fr.univ.iam.MoteurIamApplication         : Starting MoteurIamApplication using Java 17.0.18 with PID 4186203 (/home/jdidi/iam/backend/target/classes started by jdidi in /home/jdidi/iam/backend)
+2026-05-04T10:11:25.151+02:00  INFO 4186203 --- [moteur-iam] [           main] fr.univ.iam.MoteurIamApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-05-04T10:11:26.014+02:00  INFO 4186203 --- [moteur-iam] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04T10:11:26.054+02:00  INFO 4186203 --- [moteur-iam] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 34 ms. Found 5 JPA repository interfaces.
+2026-05-04T10:11:26.528+02:00  INFO 4186203 --- [moteur-iam] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-05-04T10:11:26.537+02:00  INFO 4186203 --- [moteur-iam] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-04T10:11:26.537+02:00  INFO 4186203 --- [moteur-iam] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-04T10:11:26.578+02:00  INFO 4186203 --- [moteur-iam] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1390 ms
+2026-05-04T10:11:26.730+02:00  INFO 4186203 --- [moteur-iam] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-04T10:11:26.759+02:00  INFO 4186203 --- [moteur-iam] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-05-04T10:11:27.054+02:00  INFO 4186203 --- [moteur-iam] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04T10:11:27.074+02:00  INFO 4186203 --- [moteur-iam] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-04T10:11:27.194+02:00  INFO 4186203 --- [moteur-iam] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:iamdb user=SA
+2026-05-04T10:11:27.196+02:00  INFO 4186203 --- [moteur-iam] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-04T10:11:27.213+02:00  WARN 4186203 --- [moteur-iam] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-04T10:11:27.228+02:00  INFO 4186203 --- [moteur-iam] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:iamdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: IAMDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-04T10:11:27.939+02:00  INFO 4186203 --- [moteur-iam] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04T10:11:28.013+02:00  INFO 4186203 --- [moteur-iam] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04T10:11:28.082+02:00  INFO 4186203 --- [moteur-iam] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04T10:11:29.042+02:00  WARN 4186203 --- [moteur-iam] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04T10:11:29.116+02:00  INFO 4186203 --- [moteur-iam] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-05-04T10:11:29.539+02:00  WARN 4186203 --- [moteur-iam] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-04T10:11:29.541+02:00  INFO 4186203 --- [moteur-iam] [           main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04T10:11:29.542+02:00  INFO 4186203 --- [moteur-iam] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-05-04T10:11:29.544+02:00  INFO 4186203 --- [moteur-iam] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-05-04T10:11:29.551+02:00  INFO 4186203 --- [moteur-iam] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-04T10:11:29.569+02:00 ERROR 4186203 --- [moteur-iam] [           main] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:423) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:409) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:613) ~[spring-context-7.0.6.jar:7.0.6]
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75) ~[na:na]
+	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:379) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:306) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1013) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143) ~[spring-boot-web-server-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-4.0.5.jar:4.0.5]
+	at fr.univ.iam.MoteurIamApplication.main(MoteurIamApplication.java:10) ~[classes/:na]
+Caused by: org.springframework.boot.web.server.WebServerException: Unable to start embedded Tomcat server
+	at org.springframework.boot.tomcat.TomcatWebServer.start(TomcatWebServer.java:248) ~[spring-boot-tomcat-4.0.5.jar:4.0.5]
+	at org.springframework.boot.web.server.servlet.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:44) ~[spring-boot-web-server-4.0.5.jar:4.0.5]
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:420) ~[spring-context-7.0.6.jar:7.0.6]
+	... 14 common frames omitted
+Caused by: java.lang.IllegalArgumentException: standardService.connector.startFailed
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:220) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.springframework.boot.tomcat.TomcatWebServer.addPreviouslyRemovedConnectors(TomcatWebServer.java:307) ~[spring-boot-tomcat-4.0.5.jar:4.0.5]
+	at org.springframework.boot.tomcat.TomcatWebServer.start(TomcatWebServer.java:233) ~[spring-boot-tomcat-4.0.5.jar:4.0.5]
+	... 16 common frames omitted
+Caused by: org.apache.catalina.LifecycleException: Protocol handler start failed
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1119) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:217) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	... 18 common frames omitted
+Caused by: java.net.BindException: Adresse déjà utilisée
+	at java.base/sun.nio.ch.Net.bind0(Native Method) ~[na:na]
+	at java.base/sun.nio.ch.Net.bind(Net.java:567) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:337) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:294) ~[na:na]
+	at org.apache.tomcat.util.net.NioEndpoint.initServerSocket(NioEndpoint.java:265) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:220) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.apache.tomcat.util.net.AbstractEndpoint.bindWithCleanup(AbstractEndpoint.java:1640) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:1723) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:644) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1116) ~[tomcat-embed-core-11.0.20.jar:11.0.20]
+	... 20 common frames omitted
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.404 s
+[INFO] Finished at: 2026-05-04T10:11:29+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:4.0.5:run (default-cli) on project moteur-iam: Process terminated with exit code: 1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

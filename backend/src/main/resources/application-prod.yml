@@ -1,0 +1,25 @@
+# ─── Production overrides ──────────────────────────────────────────────────────
+# Activate with: java -jar app.jar --spring.profiles.active=prod
+# Or: SPRING_PROFILES_ACTIVE=prod
+#
+# All values can also be set via environment variables, e.g.:
+#   APP_UNIVERSITY_NAME="Mon Université"
+#   APP_UNIVERSITY_SHORT_NAME="MU"
+#   APP_UNIVERSITY_APP_NAME="Mon IAM"
+#   APP_CORS_ALLOWED_ORIGINS="https://iam.mon-universite.fr"
+
+spring:
+  h2:
+    console:
+      enabled: false
+
+  # Uncomment and configure for PostgreSQL:
+  # datasource:
+  #   url: jdbc:postgresql://localhost:5432/iamdb
+  #   username: iam_user
+  #   password: <secret>
+  #   driver-class-name: org.postgresql.Driver
+  # jpa:
+  #   database-platform: org.hibernate.dialect.PostgreSQLDialect
+  #   hibernate:
+  #     ddl-auto: validate

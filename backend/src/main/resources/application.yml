@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: moteur-iam
+
+  # ─── H2 Database ─────────────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:h2:mem:iamdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # ─── JPA / Hibernate ─────────────────────────────────────────────────────────
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  # ─── Encoding ─────────────────────────────────────────────────────────────────
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+# ─── Swagger / OpenAPI ─────────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# ─── Application configuration ────────────────────────────────────────────────
+# Change these to deploy for a different university — no code change required.
+app:
+  university:
+    name: Université Paris 13
+    short-name: Paris 13
+    app-name: Sovereign IAM
+
+  # Comma-separated list of allowed frontend origins
+  cors:
+    allowed-origins: http://localhost:5173,http://127.0.0.1:5173
