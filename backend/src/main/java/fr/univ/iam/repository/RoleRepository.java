@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, UUID> {
     List<Role> findByGroupId(UUID groupId);
+    List<Role> findByActiveTrue();
 }

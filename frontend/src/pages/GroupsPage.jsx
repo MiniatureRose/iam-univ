@@ -10,7 +10,7 @@ import { useConfirm } from '../components/ui/ConfirmModal';
 import SearchSelect from '../components/business/SearchSelect';
 import { fmtDate as fmt, getColor, getInitials } from '../utils';
 
-export default function GroupsPage({ currentUser }) {
+export default function GroupsPage({ currentUser, onSelectIdentity }) {
   const isAdmin = currentUser?.appRole === 'ADMIN';
   const isConfigurator = currentUser?.appRole === 'CONFIGURATOR';
   const canEdit = isAdmin || isConfigurator;
@@ -260,13 +260,15 @@ export default function GroupsPage({ currentUser }) {
       {/* ── Panneau droit : détail ───────────────────────────── */}
       <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {!selectedGroup ? (
-          <div className="center col" style={{ flex: 1, border: '2px dashed #cbd5e1', borderRadius: 'var(--radius-lg)', color: 'var(--text-sub)', gap: '0.75rem', minHeight: 300 }}>
-            <svg style={{ width: 48, color: '#cbd5e1' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-            </svg>
+          <div className="center col card" style={{ flex: 1, borderStyle: 'dashed', borderColor: '#e2e8f0', color: 'var(--text-sub)', gap: '1rem', minHeight: 300, background: 'transparent' }}>
+            <div style={{ width: 64, height: 64, borderRadius: 16, background: '#f1f5f9', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg style={{ width: 32, color: '#cbd5e1' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+              </svg>
+            </div>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ fontWeight: 600, color: '#94a3b8', marginBottom: '0.25rem' }}>Sélectionnez un groupe</p>
-              <p className="sm muted">Cliquez sur un groupe dans le panneau de gauche</p>
+              <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.375rem', fontSize: '0.9375rem' }}>Sélectionnez un groupe</p>
+              <p className="sm muted">Cliquez sur un groupe dans le panneau de gauche pour voir ses rôles, membres et configurateurs.</p>
             </div>
           </div>
         ) : (
@@ -466,7 +468,14 @@ export default function GroupsPage({ currentUser }) {
                       const memberRoles = roles.filter(r => r.group?.id === selectedGroup?.id)
                         .filter(r => memberSnapshots.some(s => s.identity.id === m.id && s.roles?.some(a => a.role?.id === r.id)));
                       return (
-                        <div key={m.id} className="row" style={{ padding: '0.875rem 1.25rem', gap: '1rem', borderBottom: i < groupMembers.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'center' }}>
+                        <div
+                          key={m.id}
+                          className="row"
+                          onClick={() => onSelectIdentity?.(m.id)}
+                          style={{ padding: '0.875rem 1.25rem', gap: '1rem', borderBottom: i < groupMembers.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'center', cursor: onSelectIdentity ? 'pointer' : 'default', transition: 'background 0.1s' }}
+                          onMouseEnter={e => { if (onSelectIdentity) e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+                        >
                           <div className="avatar" style={{ width: 38, height: 38, fontSize: '0.75rem', background: getColor(m.firstName + m.lastName), borderRadius: '10px', flexShrink: 0 }}>
                             {getInitials(m.firstName, m.lastName)}
                           </div>
@@ -524,8 +533,8 @@ export default function GroupsPage({ currentUser }) {
                             <button
                               className="btn btn-outline btn-sm"
                               style={{ color: 'var(--red)', borderColor: 'var(--red)', fontSize: '0.6875rem' }}
-                              disabled={groupConfigurators.length <= 1}
-                              title={groupConfigurators.length <= 1 ? 'Impossible de retirer le dernier configurateur' : ''}
+                              disabled={!isAdmin && groupConfigurators.length <= 1}
+                              title={!isAdmin && groupConfigurators.length <= 1 ? 'Impossible de retirer le dernier configurateur' : ''}
                               onClick={() => handleRemoveConfigurator(m.id)}
                             >
                               Retirer

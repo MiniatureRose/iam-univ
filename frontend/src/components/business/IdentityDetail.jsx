@@ -85,62 +85,38 @@ export default function IdentityDetail({ currentUser, identityId, onBack, appCon
         <span className="breadcrumb-current">{identity.firstName} {identity.lastName}</span>
       </nav>
 
-      {/* Carte d'identité */}
-      <div className="idcard" style={{marginBottom:'1.25rem'}}>
-        <div className="idcard-gold-bar" />
-        <div className="idcard-bg-pattern" />
-        <div className="idcard-top">
-          <div className="idcard-univ"><IconUniv /> {appConfig?.universityName || 'Université'}</div>
-          <div style={{display:'flex', gap:'0.5rem', alignItems:'center'}}>
-            {identity.status && <div className="idcard-status-badge">{identity.status.name}</div>}
-            {currentUser?.appRole === 'ADMIN' && (
-              <button
-                onClick={() => setShowStatusForm(!showStatusForm)}
-                style={{background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.15)', color:'rgba(255,255,255,0.75)', fontSize:'0.6875rem', padding:'0.1875rem 0.625rem', borderRadius:'99px', cursor:'pointer', fontWeight:600, transition:'all 0.15s'}}
-              >
-                {showStatusForm ? 'Annuler' : '✏️ Statut'}
-              </button>
-            )}
+      {/* Carte profil compacte */}
+      <div className="profile-card">
+        <div className="profile-card-avatar" style={{background: avatarColor}}>
+          {identity.firstName?.[0]}{identity.lastName?.[0]}
+        </div>
+        <div className="profile-card-info">
+          <div className="profile-card-name">{identity.firstName} {identity.lastName}</div>
+          <div className="profile-card-meta">
+            <IconMail />
+            <span>{identity.primaryEmail}</span>
+            <button className="profile-card-copy" onClick={() => copyEmail(identity.primaryEmail)} title="Copier l'adresse">
+              {copied ? '✓' : <IconCopy />}
+            </button>
+            {identity.phone && <><span style={{opacity:0.4}}>·</span><IconPhone /><span>{identity.phone}</span></>}
+          </div>
+          <div className="profile-card-sub">
+            {identity.status && <span className="tag tag-gold">{identity.status.name}</span>}
+            <span className={`tag ${identity.appRole === 'ADMIN' ? 'tag-red' : identity.appRole === 'CONFIGURATOR' ? 'tag-purple' : 'tag-gray'}`}>
+              {identity.appRole === 'ADMIN' ? 'Administrateur' : identity.appRole === 'CONFIGURATOR' ? 'Configurateur' : 'Utilisateur'}
+            </span>
+            <span className="muted xs" style={{marginLeft:'0.25rem'}}>
+              · {activeAssignments.length} rôle{activeAssignments.length !== 1 ? 's' : ''} actif{activeAssignments.length !== 1 ? 's' : ''} · {groupCount} groupe{groupCount !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
-        <div className="idcard-main">
-          <div className="idcard-avatar" style={{background: avatarColor}}>
-            {identity.firstName?.[0]}{identity.lastName?.[0]}
-          </div>
-          <div className="idcard-details">
-            <div className="idcard-name">{identity.firstName} {identity.lastName}</div>
-            <div className="idcard-email">
-              <IconMail />
-              {identity.primaryEmail}
-              <button className="idcard-copy" onClick={() => copyEmail(identity.primaryEmail)} title="Copier l'adresse">
-                {copied ? '✓' : <IconCopy />}
-              </button>
-            </div>
-            {identity.phone && (
-              <div className="idcard-phone"><IconPhone /> {identity.phone}</div>
-            )}
-          </div>
-        </div>
-        <div className="idcard-footer">
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">Rôles actifs</div>
-            <div className="idcard-meta-val">{activeAssignments.length}</div>
-          </div>
-          <div className="idcard-meta-sep" />
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">Groupes</div>
-            <div className="idcard-meta-val">{groupCount}</div>
-          </div>
-          <div className="idcard-meta-sep" />
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">Membre depuis</div>
-            <div className="idcard-meta-val">{fmt(identity.createdAt || new Date())}</div>
-          </div>
-          <div className="idcard-meta-sep" />
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">Affectations passées</div>
-            <div className="idcard-meta-val">{pastAssignments.length}</div>
-          </div>
+        <div className="profile-card-side">
+          {currentUser?.appRole === 'ADMIN' && (
+            <button className="btn btn-sm btn-outline" onClick={() => setShowStatusForm(!showStatusForm)}>
+              {showStatusForm ? 'Annuler' : '✏️ Statut'}
+            </button>
+          )}
+          <div className="profile-card-org"><IconUniv /> {appConfig?.universityName || 'Université'}</div>
         </div>
       </div>
 
@@ -149,8 +125,8 @@ export default function IdentityDetail({ currentUser, identityId, onBack, appCon
         <form onSubmit={handleStatusSubmit} className="card scale-in" style={{padding:'1rem', marginBottom:'1.25rem', borderLeft:'3px solid var(--blue-500)'}}>
           <div style={{fontWeight:600, fontSize:'0.875rem', marginBottom:'0.625rem', color:'var(--blue)'}}>Changer le statut contractuel</div>
           <div className="row gap-sm">
-            <select required style={{flex:1}} value={newStatusId} onChange={e => setNewStatusId(e.target.value)}>
-              <option value="">Sélectionner un nouveau statut…</option>
+            <select style={{flex:1}} value={newStatusId} onChange={e => setNewStatusId(e.target.value)}>
+              <option value="">— Aucun statut —</option>
               {statuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <button type="submit" className="btn btn-blue">Enregistrer</button>

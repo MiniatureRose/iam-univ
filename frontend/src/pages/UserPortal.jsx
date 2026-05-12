@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchMe, updateMyContact, logout, fetchIdentityGroups } from '../services/api';
+import { fetchMe, updateMyContact, changePassword, logout, fetchIdentityGroups } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 import { getColor, isActive, fmtDate as fmt } from '../utils';
 import { IconMail, IconPhone, IconCopy, IconClock, IconUniv } from '../components/ui/Icons';
@@ -12,6 +12,9 @@ export default function UserPortal({ currentUser, appConfig }) {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
+  const [pwdForm, setPwdForm] = useState({ current: '', next: '', confirm: '' });
+  const [pwdSaving, setPwdSaving] = useState(false);
   const toast = useToast();
 
   useEffect(() => { loadProfile(); }, []);
@@ -39,6 +42,20 @@ export default function UserPortal({ currentUser, appConfig }) {
     finally { setSaving(false); }
   };
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (pwdForm.next !== pwdForm.confirm) { toast('Les mots de passe ne correspondent pas.', 'err'); return; }
+    if (pwdForm.next.length < 8) { toast('Le nouveau mot de passe doit contenir au moins 8 caractères.', 'err'); return; }
+    setPwdSaving(true);
+    try {
+      await changePassword(pwdForm.current, pwdForm.next);
+      toast('Mot de passe modifié avec succès');
+      setShowPwd(false);
+      setPwdForm({ current: '', next: '', confirm: '' });
+    } catch (err) { toast(err.message || 'Erreur lors du changement de mot de passe', 'err'); }
+    finally { setPwdSaving(false); }
+  };
+
   const copyEmail = (email) => {
     navigator.clipboard.writeText(email).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); });
   };
@@ -59,62 +76,34 @@ export default function UserPortal({ currentUser, appConfig }) {
   return (
     <div className="fade-in" style={{paddingBottom:'3rem'}}>
 
-      {/* Carte d'identité personnelle */}
-      <div className="idcard" style={{marginBottom:'1.25rem'}}>
-        <div className="idcard-gold-bar" />
-        <div className="idcard-bg-pattern" />
-        <div className="idcard-top">
-          <div className="idcard-univ"><IconUniv /> {appConfig?.universityName || 'Université'}</div>
-          <div style={{display:'flex', gap:'0.5rem', alignItems:'center'}}>
-            {identity.status && <div className="idcard-status-badge">{identity.status.name}</div>}
-            <button
-              onClick={logout}
-              style={{background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.6)', fontSize:'0.6875rem', padding:'0.1875rem 0.625rem', borderRadius:'99px', cursor:'pointer', fontWeight:600, transition:'all 0.15s'}}
-            >
-              Déconnexion
+      {/* Carte profil compacte */}
+      <div className="profile-card">
+        <div className="profile-card-avatar" style={{background: avatarColor}}>
+          {identity.firstName?.[0]}{identity.lastName?.[0]}
+        </div>
+        <div className="profile-card-info">
+          <div className="profile-card-name">{identity.firstName} {identity.lastName}</div>
+          <div className="profile-card-meta">
+            <IconMail />
+            <span>{identity.primaryEmail}</span>
+            <button className="profile-card-copy" onClick={() => copyEmail(identity.primaryEmail)} title="Copier l'adresse">
+              {copied ? '✓' : <IconCopy />}
             </button>
+            {identity.phone && <><span style={{opacity:0.4}}>·</span><IconPhone /><span>{identity.phone}</span></>}
+          </div>
+          <div className="profile-card-sub">
+            {identity.status && <span className="tag tag-gold">{identity.status.name}</span>}
+            <span className={`tag ${currentUser?.appRole === 'ADMIN' ? 'tag-red' : currentUser?.appRole === 'CONFIGURATOR' ? 'tag-purple' : 'tag-gray'}`}>
+              {currentUser?.appRole === 'ADMIN' ? 'Administrateur' : currentUser?.appRole === 'CONFIGURATOR' ? 'Configurateur' : 'Utilisateur'}
+            </span>
+            <span className="muted xs" style={{marginLeft:'0.25rem'}}>
+              · {activeAssignments.length} rôle{activeAssignments.length !== 1 ? 's' : ''} actif{activeAssignments.length !== 1 ? 's' : ''} · {groups.length} groupe{groups.length !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
-        <div className="idcard-main">
-          <div className="idcard-avatar" style={{background: avatarColor}}>
-            {identity.firstName?.[0]}{identity.lastName?.[0]}
-          </div>
-          <div className="idcard-details">
-            <div className="idcard-name">{identity.firstName} {identity.lastName}</div>
-            <div className="idcard-email">
-              <IconMail />
-              {identity.primaryEmail}
-              <button className="idcard-copy" onClick={() => copyEmail(identity.primaryEmail)} title="Copier l'adresse">
-                {copied ? '✓' : <IconCopy />}
-              </button>
-            </div>
-            {identity.phone && (
-              <div className="idcard-phone"><IconPhone /> {identity.phone}</div>
-            )}
-          </div>
-        </div>
-        <div className="idcard-footer">
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">Rôles actifs</div>
-            <div className="idcard-meta-val">{activeAssignments.length}</div>
-          </div>
-          <div className="idcard-meta-sep" />
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">Groupes</div>
-            <div className="idcard-meta-val">{groups.length}</div>
-          </div>
-          <div className="idcard-meta-sep" />
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">E-mail personnel</div>
-            <div className="idcard-meta-val" style={{fontSize:'0.75rem'}}>
-              {identity.personalEmail || <span style={{color:'rgba(255,255,255,0.3)'}}>Non renseigné</span>}
-            </div>
-          </div>
-          <div className="idcard-meta-sep" />
-          <div className="idcard-meta-item">
-            <div className="idcard-meta-label">Affectations passées</div>
-            <div className="idcard-meta-val">{pastAssignments.length}</div>
-          </div>
+        <div className="profile-card-side">
+          <button onClick={logout} className="btn btn-sm btn-outline">Déconnexion</button>
+          <div className="profile-card-org"><IconUniv /> {appConfig?.universityName || 'Université'}</div>
         </div>
       </div>
 
@@ -130,7 +119,7 @@ export default function UserPortal({ currentUser, appConfig }) {
             <div style={{flex:1}}>
               <div className="detail-sec-title">Mes informations de contact</div>
             </div>
-            {!editing && (
+            {!editing && !showPwd && (
               <button className="btn btn-sm btn-outline" onClick={() => setEditing(true)}>Modifier</button>
             )}
           </div>
@@ -153,18 +142,61 @@ export default function UserPortal({ currentUser, appConfig }) {
                 </div>
               </form>
             ) : (
-              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem'}}>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.875rem'}}>
                 {[
-                  { label: 'E-mail institutionnel', val: identity.primaryEmail },
-                  { label: 'Téléphone',             val: identity.phone },
-                  { label: 'E-mail personnel',      val: identity.personalEmail },
-                  { label: 'Statut contractuel',    val: identity.status?.name },
-                ].map(({ label, val }) => (
-                  <div key={label}>
-                    <div className="lbl">{label}</div>
-                    <div className="sm">{val || <em className="muted xs">Non renseigné</em>}</div>
+                  { label: 'E-mail institutionnel', val: identity.primaryEmail,   icon: '✉️' },
+                  { label: 'Téléphone',             val: identity.phone,          icon: '📞' },
+                  { label: 'E-mail personnel',      val: identity.personalEmail,  icon: '🏠' },
+                  { label: 'Statut contractuel',    val: identity.status?.name,   icon: '📋' },
+                ].map(({ label, val, icon }) => (
+                  <div key={label} style={{
+                    padding:'0.75rem', borderRadius:'var(--radius)',
+                    background:'var(--bg-hover)', border:'1px solid var(--border)',
+                  }}>
+                    <div className="lbl" style={{marginBottom:'0.375rem'}}>{label}</div>
+                    <div className="sm" style={{fontWeight: val ? 500 : 400}}>
+                      {val ? val : <em className="muted xs" style={{fontStyle:'normal'}}>Non renseigné</em>}
+                    </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Changement de mot de passe — intégré dans la carte contact */}
+            {!editing && (
+              <div style={{marginTop:'0.875rem', borderTop:'1px solid var(--border)', paddingTop:'0.875rem'}}>
+                {showPwd ? (
+                  <form onSubmit={handleChangePassword} className="col gap-md fade-in">
+                    <div className="lbl" style={{color:'var(--text-sub)', marginBottom:'-0.25rem'}}>Changer le mot de passe</div>
+                    <div className="form-row">
+                      <div className="field">
+                        <label className="lbl">Mot de passe actuel</label>
+                        <input type="password" required value={pwdForm.current} onChange={e => setPwdForm({...pwdForm, current: e.target.value})} autoComplete="current-password" />
+                      </div>
+                      <div className="field">
+                        <label className="lbl">Nouveau mot de passe</label>
+                        <input type="password" required minLength={8} value={pwdForm.next} onChange={e => setPwdForm({...pwdForm, next: e.target.value})} autoComplete="new-password" />
+                      </div>
+                      <div className="field">
+                        <label className="lbl">Confirmer</label>
+                        <input type="password" required value={pwdForm.confirm} onChange={e => setPwdForm({...pwdForm, confirm: e.target.value})} autoComplete="new-password" />
+                      </div>
+                    </div>
+                    <div className="form-actions">
+                      <button type="button" className="btn btn-outline btn-sm" onClick={() => { setShowPwd(false); setPwdForm({ current: '', next: '', confirm: '' }); }}>Annuler</button>
+                      <button type="submit" className="btn btn-blue btn-sm" disabled={pwdSaving}>{pwdSaving ? 'Enregistrement…' : 'Mettre à jour'}</button>
+                    </div>
+                  </form>
+                ) : (
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => setShowPwd(true)}
+                    style={{display:'flex', alignItems:'center', gap:'0.375rem'}}
+                  >
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Changer le mot de passe
+                  </button>
+                )}
               </div>
             )}
           </div>

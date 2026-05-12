@@ -93,3 +93,10 @@ export const terminateAssignment = (type, id, endDate) => {
   const q = endDate ? `?endDate=${endDate}` : '';
   return request(`/assignments/${plurals[type]}/${id}/terminate${q}`, { method: 'PATCH' });
 };
+
+
+// ─── Audit ─────────────────────────────────────────────────
+export const fetchAuditLogs = (page = 0, size = 30, entityType = '') => {
+  const q = entityType ? `&entityType=${encodeURIComponent(entityType)}` : '';
+  return request(`/audit?page=${page}&size=${size}${q}`);
+};

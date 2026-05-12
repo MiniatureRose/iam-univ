@@ -23,7 +23,7 @@ public class StatusController {
     private final IamService iamService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'CONFIGURATOR')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<StatusDto>> getAllStatuses() {
         return ResponseEntity.ok(statusRepository.findAll().stream().map(StatusDto::from).toList());
     }

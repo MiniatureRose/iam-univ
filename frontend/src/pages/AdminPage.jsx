@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchIdentities, updateAppRole, fetchGroups, addGroupConfigurator, fetchStats } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 import SearchSelect from '../components/business/SearchSelect';
 import IdentityList from '../components/business/IdentityList';
 import StatusPage from './StatusPage';
+import AuditPage from './AuditPage';
 import { getColor, getInitials } from '../utils';
 
 const ROLE_META = {
@@ -79,13 +80,24 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
     const isConfigurator = roleType === 'CONFIGURATOR';
     return (
     <div className="card tbl" style={{ marginBottom: '1.5rem', overflow: 'hidden' }}>
-      <div style={{ padding:'1rem 1.25rem', background:'var(--bg-hover)', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:'0.75rem' }}>
-        <div style={{ width:10, height:10, borderRadius:'50%', background: roleType==='ADMIN' ? 'var(--red)' : 'var(--purple)', flexShrink:0 }} />
-        <div>
-          <div style={{ fontWeight:600, fontSize:'0.9375rem' }}>{roleType==='ADMIN' ? 'Administrateurs système' : 'Configurateurs de groupes'}</div>
+      <div style={{
+        padding:'1rem 1.25rem', background:'var(--bg-hover)', borderBottom:'1px solid var(--border)',
+        display:'flex', alignItems:'center', gap:'0.875rem',
+        borderLeft: `3px solid ${roleType==='ADMIN' ? 'var(--red)' : 'var(--purple)'}`,
+      }}>
+        <div style={{
+          width:36, height:36, borderRadius:8, flexShrink:0,
+          background: roleType==='ADMIN' ? '#fef2f2' : '#ede9fe',
+          color: roleType==='ADMIN' ? 'var(--red)' : 'var(--purple)',
+          display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem',
+        }}>
+          {roleType==='ADMIN' ? '⚡' : '⚙️'}
+        </div>
+        <div style={{flex:1}}>
+          <div style={{ fontWeight:700, fontSize:'0.9375rem' }}>{roleType==='ADMIN' ? 'Administrateurs système' : 'Configurateurs de groupes'}</div>
           <div className="xs muted">{ROLE_META[roleType].desc}</div>
         </div>
-        <span className="tag tag-gray" style={{marginLeft:'auto'}}>{usersList.length}</span>
+        <span className={`tag ${roleType==='ADMIN' ? 'tag-red' : 'tag-purple'}`}>{usersList.length}</span>
       </div>
       <table>
         <thead>
@@ -103,8 +115,8 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
             const groups = configuratorGroups[u.id] || [];
             const isExpanded = expandedConfigId === u.id;
             return (
-              <>
-                <tr key={u.id}>
+              <React.Fragment key={u.id}>
+                <tr>
                   <td>
                     <div className="row gap-sm" style={{alignItems:'center'}}>
                       <div className="avatar" style={{width:34, height:34, background:getColor(u.firstName+u.lastName), color:'white', fontSize:'0.75rem', flexShrink:0}}>{getInitials(u.firstName, u.lastName)}</div>
@@ -162,7 +174,7 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             );
           })}
         </tbody>
@@ -175,6 +187,7 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
     { key: 'annuaire',    label: 'Annuaire des personnels' },
     { key: 'promotions',  label: 'Privilèges & Promotions' },
     { key: 'status',      label: 'Statuts' },
+    { key: 'audit',       label: 'Journal d\'audit' },
   ];
 
   return (
@@ -191,12 +204,12 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
       {stats && (
         <div className="stats" style={{marginBottom:'1.5rem'}}>
           {[
-            { ic:'👤', val:stats.identities, lbl:'Identités',   bg:'#dbeafe', col:'#1e40af' },
-            { ic:'🔑', val:stats.roles,      lbl:'Rôles',       bg:'#ede9fe', col:'#6d28d9' },
-            { ic:'🏢', val:stats.groups,     lbl:'Groupes',     bg:'#d1fae5', col:'#065f46' },
-            { ic:'📋', val:stats.statuses,   lbl:'Statuts',     bg:'#fef3c7', col:'#92400e' },
+            { ic:'👤', val:stats.identities, lbl:'Identités',   bg:'#dbeafe', col:'#1e40af', accent:'#2563eb' },
+            { ic:'🔑', val:stats.roles,      lbl:'Rôles',       bg:'#ede9fe', col:'#6d28d9', accent:'#7c3aed' },
+            { ic:'🏢', val:stats.groups,     lbl:'Groupes',     bg:'#d1fae5', col:'#065f46', accent:'#059669' },
+            { ic:'📋', val:stats.statuses,   lbl:'Statuts',     bg:'#fef3c7', col:'#92400e', accent:'#d97706' },
           ].map(s => (
-            <div key={s.lbl} className="stat card">
+            <div key={s.lbl} className="stat card" style={{'--stat-accent': s.accent}}>
               <div className="stat-ic" style={{background:s.bg, color:s.col}}>{s.ic}</div>
               <div><div className="stat-val">{s.val}</div><div className="stat-lbl">{s.lbl}</div></div>
             </div>
@@ -220,6 +233,8 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
 
       {activeTab === 'status' && <StatusPage hideHeader={true} />}
 
+      {activeTab === 'audit' && <AuditPage />}
+
       {activeTab === 'promotions' && (
         <div>
           <div className="row end" style={{marginBottom:'1.25rem'}}>
@@ -236,8 +251,11 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
       {/* Modal promotion */}
       {showPromote && (
         <div style={{position:'fixed',inset:0,background:'var(--bg-overlay)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}}>
-          <div className="card slide-up" style={{width:'100%',maxWidth:480,padding:'2rem'}}>
-            <h2 style={{marginBottom:'1.25rem', fontSize:'1.125rem'}}>Promouvoir un utilisateur</h2>
+          <div className="card slide-up" style={{width:'100%',maxWidth:500,padding:'2rem',boxShadow:'var(--shadow-xl)'}}>
+            <div style={{marginBottom:'1.5rem'}}>
+              <h2 style={{marginBottom:'0.25rem'}}>Promouvoir un utilisateur</h2>
+              <p className="sm muted">Attribuez un rôle système élevé à un membre de l'annuaire.</p>
+            </div>
             <form onSubmit={handlePromote} className="col gap-md">
               <div className="field">
                 <span className="label">Utilisateur à promouvoir</span>
@@ -246,13 +264,34 @@ export default function AdminPage({ currentUser, onSelectIdentity }) {
               <div className="field">
                 <span className="label">Nouveau rôle système</span>
                 <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem'}}>
-                  {['ADMIN','CONFIGURATOR'].map(r => (
-                    <label key={r} className="card" style={{padding:'1rem', cursor:'pointer', border: selectedRole===r ? `2px solid ${r==='ADMIN'?'var(--red)':'var(--purple)'}` : '2px solid transparent', background: selectedRole===r ? (r==='ADMIN'?'#fef2f2':'#faf5ff') : 'var(--bg-hover)'}}>
-                      <input type="radio" name="role" value={r} checked={selectedRole===r} onChange={e=>setSelectedRole(e.target.value)} style={{display:'none'}} />
-                      <div style={{fontWeight:600, color: r==='ADMIN'?'var(--red)':'var(--purple)', marginBottom:'0.25rem'}}>{r==='ADMIN'?'Administrateur':'Configurateur'}</div>
-                      <div className="xs muted">{ROLE_META[r].desc}</div>
+                  {['ADMIN','CONFIGURATOR'].map(r => {
+                    const isSelected = selectedRole === r;
+                    const isAdmin = r === 'ADMIN';
+                    return (
+                    <label key={r} style={{
+                      padding:'1rem', cursor:'pointer', borderRadius:'var(--radius-lg)',
+                      border: isSelected ? `2px solid ${isAdmin?'var(--red)':'var(--purple)'}` : '2px solid var(--border)',
+                      background: isSelected ? (isAdmin?'#fef2f2':'#faf5ff') : 'var(--bg-hover)',
+                      transition:'all 0.15s', display:'flex', gap:'0.75rem', alignItems:'flex-start',
+                    }}>
+                      <input type="radio" name="role" value={r} checked={isSelected} onChange={e=>setSelectedRole(e.target.value)} style={{display:'none'}} />
+                      <div style={{
+                        width:32, height:32, borderRadius:8, flexShrink:0, marginTop:1,
+                        background: isAdmin ? '#fef2f2' : '#ede9fe',
+                        color: isAdmin ? 'var(--red)' : 'var(--purple)',
+                        display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.875rem',
+                      }}>
+                        {isAdmin ? '⚡' : '⚙️'}
+                      </div>
+                      <div>
+                        <div style={{fontWeight:700, fontSize:'0.875rem', color: isAdmin?'var(--red)':'var(--purple)', marginBottom:'0.25rem'}}>
+                          {isAdmin?'Administrateur':'Configurateur'}
+                        </div>
+                        <div className="xs muted">{ROLE_META[r].desc}</div>
+                      </div>
                     </label>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
               {selectedRole === 'CONFIGURATOR' && (

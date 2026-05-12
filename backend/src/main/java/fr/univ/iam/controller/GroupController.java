@@ -33,7 +33,7 @@ public class GroupController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'CONFIGURATOR')")
     public ResponseEntity<List<GroupDto>> getAllGroups() {
-        return ResponseEntity.ok(groupRepository.findAll().stream().map(GroupDto::from).toList());
+        return ResponseEntity.ok(groupRepository.findByActiveTrue().stream().map(GroupDto::from).toList());
     }
 
     @PostMapping

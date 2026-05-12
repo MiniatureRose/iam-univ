@@ -25,7 +25,7 @@ public class RoleController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'CONFIGURATOR')")
     public ResponseEntity<List<RoleDto>> getAllRoles() {
-        return ResponseEntity.ok(roleRepository.findAll().stream().map(RoleDto::from).toList());
+        return ResponseEntity.ok(roleRepository.findByActiveTrue().stream().map(RoleDto::from).toList());
     }
 
     @PostMapping

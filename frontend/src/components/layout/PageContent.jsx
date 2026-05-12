@@ -28,7 +28,7 @@ export default function PageContent({ tab, selectedId, setSelectedId, currentUse
 
   if (tab === 'identities') return <IdentityList currentUser={currentUser} onSelect={setSelectedId} />;
   if (tab === 'portal')     return <UserPortal currentUser={currentUser} appConfig={appConfig} />;
-  if (tab === 'groups')     return <GroupsPage currentUser={currentUser} />;
+  if (tab === 'groups')     return <GroupsPage currentUser={currentUser} onSelectIdentity={setSelectedId} />;
   if (tab === 'admin' && isAdmin) {
     return <AdminPage currentUser={currentUser} onSelectIdentity={setSelectedId} />;
   }

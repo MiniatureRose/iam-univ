@@ -6,7 +6,7 @@ import { getColor, getInitials } from '../../utils';
 import { SkeletonRow } from '../ui/Skeleton';
 
 const StatusTag = ({ name }) => name
-  ? <span className="tag" style={{ background: getColor(name), color: '#fff' }}>{name}</span>
+  ? <span className="tag tag-gray">{name}</span>
   : <span className="muted xs">—</span>;
 
 export default function IdentityList({ currentUser, onSelect, hideHeader }) {
@@ -102,15 +102,15 @@ export default function IdentityList({ currentUser, onSelect, hideHeader }) {
       {/* Stats — masquées si le parent gère déjà des stats (hideHeader) */}
       {!hideHeader && (
         <div className="stats">
-          <div className="stat card">
+          <div className="stat card" style={{'--stat-accent':'#2563eb'}}>
             <div className="stat-ic" style={{background:'#dbeafe',color:'#1e40af'}}>👤</div>
             <div><div className="stat-val">{totalElements}</div><div className="stat-lbl">Identités</div></div>
           </div>
-          <div className="stat card">
+          <div className="stat card" style={{'--stat-accent':'#059669'}}>
             <div className="stat-ic" style={{background:'#d1fae5',color:'#065f46'}}>✓</div>
             <div><div className="stat-val">{withStatus}</div><div className="stat-lbl">Avec statut</div></div>
           </div>
-          <div className="stat card">
+          <div className="stat card" style={{'--stat-accent':'#d97706'}}>
             <div className="stat-ic" style={{background:'#fef3c7',color:'#92400e'}}>🔑</div>
             <div><div className="stat-val">{totalRolesCreated}</div><div className="stat-lbl">Rôles créés</div></div>
           </div>

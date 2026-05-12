@@ -4,12 +4,15 @@ import fr.univ.iam.domain.*;
 import fr.univ.iam.dto.IdentityCreateResult;
 import fr.univ.iam.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,6 +31,7 @@ public class IamService {
     private final RoleAssignmentRepository roleAssignmentRepository;
     private final AssignmentValidationService validationService;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLog;
 
     private String generateTempPassword() {
         StringBuilder sb = new StringBuilder();
@@ -41,7 +45,6 @@ public class IamService {
             throw new IllegalStateException("The email address " + email + " is already in use.");
         }
 
-        // Only admins may assign a role above USER at creation time.
         if (appRole != null && appRole != AppRole.USER) {
             if (!callerIsAdmin) {
                 throw new SecurityException("Only an administrator can assign an elevated role.");
@@ -57,16 +60,18 @@ public class IamService {
         identity.setPhone(phone);
         identity.setPassword(passwordEncoder.encode(tempPassword));
         identity.setMustChangePassword(true);
-        if (appRole != null) {
-            identity.setAppRole(appRole);
-        }
+        if (appRole != null) identity.setAppRole(appRole);
 
         if (statusId != null) {
             Status status = statusRepository.findById(statusId)
                     .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId));
             identity.setStatus(status);
         }
-        return new IdentityCreateResult(identityRepository.save(identity), tempPassword);
+
+        Identity saved = identityRepository.save(identity);
+        auditLog.log("IDENTITY_CREATED", "IDENTITY", saved.getId().toString(),
+                firstName + " " + lastName, "Email : " + email);
+        return new IdentityCreateResult(saved, tempPassword);
     }
 
     public Identity updateAppRole(UUID id, AppRole appRole, String callerEmail) {
@@ -82,37 +87,60 @@ public class IamService {
                     "Un configurateur doit gérer au moins un groupe. Ajoutez d'abord cette identité comme configurateur d'un groupe.");
         }
 
+        AppRole oldRole = identity.getAppRole();
         identity.setAppRole(appRole);
-        return identityRepository.save(identity);
+
+        if (appRole == AppRole.USER) {
+            groupRepository.findActiveGroupsByConfiguratorId(id).forEach(group -> {
+                group.getConfigurators().remove(identity);
+                groupRepository.save(group);
+            });
+        }
+
+        Identity saved = identityRepository.save(identity);
+        auditLog.log("APP_ROLE_CHANGED", "IDENTITY", id.toString(),
+                identity.getFirstName() + " " + identity.getLastName(),
+                "Rôle : " + oldRole + " → " + appRole);
+        return saved;
     }
 
     public void deleteIdentity(UUID id) {
+        Identity identity = identityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Identity not found: " + id));
+        String name = identity.getFirstName() + " " + identity.getLastName();
         identityRepository.deleteById(id);
+        auditLog.log("IDENTITY_DELETED", "IDENTITY", id.toString(), name, null);
     }
 
     public Role createRole(String name, String description, UUID groupId) {
         Role role = new Role();
         role.setName(name);
         role.setDescription(description);
+        String groupName = null;
         if (groupId != null) {
             Group group = groupRepository.findById(groupId)
                     .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
             role.setGroup(group);
+            groupName = group.getName();
         }
-        return roleRepository.save(role);
+        Role saved = roleRepository.save(role);
+        auditLog.log("ROLE_CREATED", "ROLE", saved.getId().toString(), name,
+                groupName != null ? "Groupe : " + groupName : null);
+        return saved;
     }
 
     public void deleteRole(UUID id) {
         roleRepository.findById(id).ifPresent(role -> {
+            String roleName = role.getName();
             role.setActive(false);
             roleRepository.save(role);
-            // Close all active assignments for this role
             roleAssignmentRepository.findByRoleId(id).stream()
                     .filter(a -> a.getEndDate() == null || a.getEndDate().isAfter(LocalDate.now()))
                     .forEach(a -> {
                         a.setEndDate(LocalDate.now());
                         roleAssignmentRepository.save(a);
                     });
+            auditLog.log("ROLE_DELETED", "ROLE", id.toString(), roleName, null);
         });
     }
 
@@ -130,6 +158,9 @@ public class IamService {
     public RoleAssignment assignRole(UUID identityId, UUID roleId, LocalDate startDate, LocalDate endDate) {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleId));
+        if (!role.isActive()) {
+            throw new IllegalArgumentException("Cannot assign a deleted role.");
+        }
         validationService.validateRoleAssignment(identityId, roleId, startDate, endDate);
         Identity identity = identityRepository.findById(identityId)
                 .orElseThrow(() -> new IllegalArgumentException("Identity not found: " + identityId));
@@ -139,30 +170,45 @@ public class IamService {
         assignment.setRole(role);
         assignment.setStartDate(startDate);
         assignment.setEndDate(endDate);
-        return roleAssignmentRepository.save(assignment);
+        RoleAssignment saved = roleAssignmentRepository.save(assignment);
+
+        String groupPart = role.getGroup() != null ? " (" + role.getGroup().getName() + ")" : "";
+        auditLog.log("ROLE_ASSIGNED", "ROLE_ASSIGNMENT", saved.getId().toString(),
+                identity.getFirstName() + " " + identity.getLastName(),
+                "Rôle : " + role.getName() + groupPart + ", depuis le " + startDate);
+        return saved;
     }
 
     public Identity assignStatus(UUID identityId, UUID statusId) {
         Identity identity = identityRepository.findById(identityId)
                 .orElseThrow(() -> new IllegalArgumentException("Identity not found: " + identityId));
 
+        String statusName;
         if (statusId == null) {
             identity.setStatus(null);
+            statusName = "—";
         } else {
             Status status = statusRepository.findById(statusId)
                     .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId));
             identity.setStatus(status);
+            statusName = status.getName();
         }
-        return identityRepository.save(identity);
+        Identity saved = identityRepository.save(identity);
+        auditLog.log("STATUS_ASSIGNED", "IDENTITY", identityId.toString(),
+                identity.getFirstName() + " " + identity.getLastName(),
+                "Statut : " + statusName);
+        return saved;
     }
 
     public Group createGroup(String name, UUID parentId, UUID configuratorId) {
         Group group = new Group();
         group.setName(name);
+        String parentName = null;
         if (parentId != null) {
             Group parent = groupRepository.findById(parentId)
                     .orElseThrow(() -> new IllegalArgumentException("Parent group not found: " + parentId));
             group.setParent(parent);
+            parentName = parent.getName();
         }
         group = groupRepository.save(group);
 
@@ -173,21 +219,30 @@ public class IamService {
             group = groupRepository.save(group);
             promoteToConfiguratorIfNeeded(configurator);
         }
+        auditLog.log("GROUP_CREATED", "GROUP", group.getId().toString(), name,
+                parentName != null ? "Groupe parent : " + parentName : null);
         return group;
     }
 
     public Group updateGroup(UUID id, String name) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found: " + id));
+        String oldName = group.getName();
         group.setName(name);
-        return groupRepository.save(group);
+        Group saved = groupRepository.save(group);
+        auditLog.log("GROUP_RENAMED", "GROUP", id.toString(), name, "Ancien nom : " + oldName);
+        return saved;
     }
 
     public void deleteGroup(UUID id) {
         groupRepository.findById(id).ifPresent(group -> {
+            String groupName = group.getName();
             group.setActive(false);
+
+            Set<Identity> formerConfigurators = new HashSet<>(group.getConfigurators());
+            group.getConfigurators().clear();
             groupRepository.save(group);
-            // Soft-delete all roles in the group and close their active assignments
+
             roleRepository.findByGroupId(id).forEach(role -> {
                 role.setActive(false);
                 roleRepository.save(role);
@@ -198,6 +253,15 @@ public class IamService {
                             roleAssignmentRepository.save(a);
                         });
             });
+
+            formerConfigurators.forEach(c -> {
+                if (!groupRepository.existsByConfiguratorId(c.getId()) && c.getAppRole() == AppRole.CONFIGURATOR) {
+                    c.setAppRole(AppRole.USER);
+                    identityRepository.save(c);
+                }
+            });
+
+            auditLog.log("GROUP_DELETED", "GROUP", id.toString(), groupName, null);
         });
     }
 
@@ -210,6 +274,8 @@ public class IamService {
         group.getConfigurators().add(configurator);
         groupRepository.save(group);
         promoteToConfiguratorIfNeeded(configurator);
+        auditLog.log("CONFIGURATOR_ADDED", "GROUP", groupId.toString(), group.getName(),
+                "Configurateur : " + configurator.getFirstName() + " " + configurator.getLastName());
         return group.getConfigurators();
     }
 
@@ -219,7 +285,11 @@ public class IamService {
         Identity configurator = identityRepository.findById(identityId)
                 .orElseThrow(() -> new IllegalArgumentException("Identity not found: " + identityId));
 
-        if (group.getConfigurators().size() <= 1 && group.getConfigurators().contains(configurator)) {
+        Authentication callerAuth = SecurityContextHolder.getContext().getAuthentication();
+        boolean callerIsAdmin = callerAuth != null && callerAuth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!callerIsAdmin && group.getConfigurators().size() <= 1 && group.getConfigurators().contains(configurator)) {
             throw new IllegalStateException("Cannot remove the last configurator of a group.");
         }
 
@@ -230,16 +300,22 @@ public class IamService {
             configurator.setAppRole(AppRole.USER);
             identityRepository.save(configurator);
         }
+        auditLog.log("CONFIGURATOR_REMOVED", "GROUP", groupId.toString(), group.getName(),
+                "Configurateur : " + configurator.getFirstName() + " " + configurator.getLastName());
     }
 
     public void terminateRole(UUID id, LocalDate endDate) {
         RoleAssignment assignment = roleAssignmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Role assignment not found: " + id));
-        assignment.setEndDate(endDate != null ? endDate : LocalDate.now().minusDays(1));
+        String identityName = assignment.getIdentity().getFirstName() + " " + assignment.getIdentity().getLastName();
+        String roleName = assignment.getRole().getName();
+        LocalDate effectiveEnd = endDate != null ? endDate : LocalDate.now().minusDays(1);
+        assignment.setEndDate(effectiveEnd);
         roleAssignmentRepository.save(assignment);
+        auditLog.log("ROLE_TERMINATED", "ROLE_ASSIGNMENT", id.toString(), identityName,
+                "Rôle : " + roleName + ", fin le " + effectiveEnd);
     }
 
-    /** Auto-promotes a USER to CONFIGURATOR when they are assigned to manage a group. */
     private void promoteToConfiguratorIfNeeded(Identity identity) {
         if (identity.getAppRole() == AppRole.USER) {
             identity.setAppRole(AppRole.CONFIGURATOR);

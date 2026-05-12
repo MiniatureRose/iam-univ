@@ -5,6 +5,7 @@ import fr.univ.iam.dto.GroupDto;
 import fr.univ.iam.dto.IdentityDto;
 import fr.univ.iam.repository.IdentityRepository;
 import fr.univ.iam.repository.GroupRepository;
+import fr.univ.iam.service.AuditLogService;
 import fr.univ.iam.service.IdentityTimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ public class MeController {
     private final IdentityTimelineService timelineService;
     private final GroupRepository groupRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLog;
 
     /** Returns the authenticated user's current profile snapshot. */
     @GetMapping
@@ -70,6 +72,8 @@ public class MeController {
         identity.setPassword(passwordEncoder.encode(dto.newPassword()));
         identity.setMustChangePassword(false);
         identityRepository.save(identity);
+        auditLog.log("PASSWORD_CHANGED", "IDENTITY", identity.getId().toString(),
+                identity.getFirstName() + " " + identity.getLastName(), null);
         return ResponseEntity.noContent().build();
     }
 

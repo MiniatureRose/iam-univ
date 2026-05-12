@@ -3,10 +3,8 @@ package fr.univ.iam.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
@@ -31,10 +29,6 @@ public class Identity {
 
     @Column(nullable = false, unique = true)
     private String primaryEmail;
-
-    @Column(nullable = false, updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
 
     @JsonIgnore
     @Column(nullable = false)
