@@ -212,7 +212,7 @@ export default function GroupsPage({ currentUser }) {
   });
 
   return (
-    <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '1.25rem', height: 'calc(100vh - 4rem)' }}>
+    <div className="fade-in groups-layout" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '1.25rem', height: 'calc(100vh - 4rem)' }}>
 
       {/* ── Panneau gauche : arborescence ───────────────────── */}
       <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>

@@ -3,6 +3,7 @@ import { createIdentity, deleteIdentity, fetchAllSnapshots, fetchStatuses, fetch
 import { useToast } from '../../contexts/ToastContext';
 import { useConfirm } from '../ui/ConfirmModal';
 import { getColor, getInitials } from '../../utils';
+import { SkeletonRow } from '../ui/Skeleton';
 
 const StatusTag = ({ name }) => name
   ? <span className="tag" style={{ background: getColor(name), color: '#fff' }}>{name}</span>
@@ -147,31 +148,24 @@ export default function IdentityList({ currentUser, onSelect, hideHeader }) {
         </form>
       )}
 
-      {/* Mot de passe temporaire — affiché une seule fois après création */}
+      {/* Mot de passe temporaire */}
       {tempPassword && (
-        <div className="card slide-up" style={{
-          marginBottom:'1rem', padding:'1.25rem',
-          borderLeft:'4px solid var(--accent)', background:'var(--bg-hover)'
-        }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-            <div>
-              <div style={{ fontWeight:600, marginBottom:'0.25rem' }}>Identité créée avec succès</div>
-              <div className="muted sm" style={{ marginBottom:'0.75rem' }}>
-                Communiquez ce mot de passe temporaire à l'utilisateur. Il devra le changer à sa première connexion.
-              </div>
-              <div style={{
-                display:'inline-flex', alignItems:'center', gap:'0.75rem',
-                background:'var(--bg)', border:'1px solid var(--border)',
-                borderRadius:6, padding:'0.5rem 1rem'
-              }}>
-                <span style={{ fontFamily:'monospace', fontSize:'1.1rem', letterSpacing:'0.05em' }}>{tempPassword}</span>
-                <button className="btn btn-outline" style={{ padding:'0.2rem 0.6rem', fontSize:'0.75rem' }}
-                  onClick={() => { navigator.clipboard.writeText(tempPassword); }}>
-                  Copier
-                </button>
-              </div>
+        <div className="tmpwd slide-up">
+          <div className="tmpwd-badge">⚠️ À communiquer une seule fois</div>
+          <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Identité créée — mot de passe temporaire</div>
+          <div className="muted sm" style={{ marginBottom: '0.75rem' }}>
+            Transmettez ce mot de passe à l'utilisateur. Il sera invité à le changer à la première connexion. <strong>Cette bannière disparaîtra à la prochaine action.</strong>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="tmpwd-code">
+              <span>{tempPassword}</span>
+              <button className="btn btn-outline btn-sm" onClick={() => navigator.clipboard.writeText(tempPassword)}>
+                Copier
+              </button>
             </div>
-            <button className="btn" style={{ padding:'0.25rem 0.5rem' }} onClick={() => setTempPassword(null)}>✕</button>
+            <button className="btn btn-dark btn-sm" onClick={() => setTempPassword(null)}>
+              J'ai noté le mot de passe
+            </button>
           </div>
         </div>
       )}
@@ -202,7 +196,10 @@ export default function IdentityList({ currentUser, onSelect, hideHeader }) {
       {/* Table */}
       <div className="tbl card">
         {loading ? (
-          <div style={{padding:'3rem',textAlign:'center'}}><p className="muted sm">Chargement de l'annuaire…</p></div>
+          <table>
+            <thead><tr><th>Personne</th><th>Statut</th><th>Rôles</th></tr></thead>
+            <tbody>{Array.from({length:8}).map((_,i) => <SkeletonRow key={i} cols={3} />)}</tbody>
+          </table>
         ) : filtered.length === 0 ? (
           <div style={{padding:'3rem',textAlign:'center'}}>
             <p style={{fontSize:'2rem',marginBottom:'0.5rem',opacity:0.5}}>🔍</p>

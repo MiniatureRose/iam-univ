@@ -5,7 +5,7 @@ import { useConfirm } from '../ui/ConfirmModal';
 import { getColor, isActive, fmtDate as fmt } from '../../utils';
 import { IconMail, IconPhone, IconCopy, IconClock, IconUniv } from '../ui/Icons';
 
-export default function IdentityDetail({ currentUser, identityId, onBack, appConfig }) {
+export default function IdentityDetail({ currentUser, identityId, onBack, appConfig, fromLabel = 'Annuaire' }) {
   const [tl, setTl] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,10 +78,12 @@ export default function IdentityDetail({ currentUser, identityId, onBack, appCon
   return (
     <div className="detail-page fade-in" style={{paddingBottom:'3rem'}}>
 
-      <button onClick={onBack} className="detail-back">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
-        Retour au registre
-      </button>
+      <nav className="breadcrumb">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{opacity:0.5}}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <button className="breadcrumb-link" onClick={onBack}>{fromLabel}</button>
+        <span className="breadcrumb-sep">/</span>
+        <span className="breadcrumb-current">{identity.firstName} {identity.lastName}</span>
+      </nav>
 
       {/* Carte d'identité */}
       <div className="idcard" style={{marginBottom:'1.25rem'}}>

@@ -44,6 +44,7 @@ export default function App() {
   const [tab, setTab]                   = useState('portal');
   const [selectedId, setSelectedId]     = useState(null);
   const [counts, setCounts]             = useState({ i: 0, g: 0 });
+  const [mobileOpen, setMobileOpen]     = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -61,10 +62,11 @@ export default function App() {
     init();
   }, []);
 
+  // Refresh sidebar counts on every tab change (picks up any mutations)
   useEffect(() => {
     if (!currentUser) return;
     fetchStats().then(s => setCounts({ i: s.identities, g: s.groups })).catch(() => {});
-  }, [currentUser]);
+  }, [currentUser, tab]);
 
   const handleTabChange = (newTab) => { setTab(newTab); setSelectedId(null); };
 
@@ -105,14 +107,23 @@ export default function App() {
             tab={tab}
             selectedId={selectedId}
             setTab={handleTabChange}
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
           />
           <main className="main">
+            <div className="mobile-topbar">
+              <button className="hamburger" onClick={() => setMobileOpen(true)} aria-label="Ouvrir le menu">
+                <span /><span /><span />
+              </button>
+              <span className="mobile-topbar-brand">{appConfig.appName}</span>
+            </div>
             <PageContent
               tab={tab}
               selectedId={selectedId}
               setSelectedId={setSelectedId}
               currentUser={currentUser}
               appConfig={appConfig}
+              fromTab={tab}
             />
           </main>
         </div>

@@ -4,7 +4,14 @@ import GroupsPage from '../../pages/GroupsPage';
 import AdminPage from '../../pages/AdminPage';
 import UserPortal from '../../pages/UserPortal';
 
-export default function PageContent({ tab, selectedId, setSelectedId, currentUser, appConfig }) {
+const FROM_LABELS = {
+  identities: 'Annuaire',
+  admin:      'Administration',
+  groups:     'Groupes',
+  portal:     'Mon Profil',
+};
+
+export default function PageContent({ tab, selectedId, setSelectedId, currentUser, appConfig, fromTab }) {
   const isAdmin = currentUser?.appRole === 'ADMIN';
 
   if (selectedId) {
@@ -13,6 +20,7 @@ export default function PageContent({ tab, selectedId, setSelectedId, currentUse
         identityId={selectedId}
         currentUser={currentUser}
         appConfig={appConfig}
+        fromLabel={FROM_LABELS[fromTab] || 'Retour'}
         onBack={() => setSelectedId(null)}
       />
     );
