@@ -102,9 +102,8 @@ export default function IdentityDetail({ currentUser, identityId, onBack, appCon
           </div>
           <div className="profile-card-sub">
             {identity.status && <span className="tag tag-gold">{identity.status.name}</span>}
-            <span className={`tag ${identity.appRole === 'ADMIN' ? 'tag-red' : identity.appRole === 'CONFIGURATOR' ? 'tag-purple' : 'tag-gray'}`}>
-              {identity.appRole === 'ADMIN' ? 'Administrateur' : identity.appRole === 'CONFIGURATOR' ? 'Configurateur' : 'Utilisateur'}
-            </span>
+            {identity.appRole === 'ADMIN' && <span className="tag tag-red">Administrateur</span>}
+            {identity.appRole === 'CONFIGURATOR' && <span className="tag tag-purple">Configurateur</span>}
             <span className="muted xs" style={{marginLeft:'0.25rem'}}>
               · {activeAssignments.length} rôle{activeAssignments.length !== 1 ? 's' : ''} actif{activeAssignments.length !== 1 ? 's' : ''} · {groupCount} groupe{groupCount !== 1 ? 's' : ''}
             </span>

@@ -41,9 +41,9 @@ springdoc:
 # Change these to deploy for a different university — no code change required.
 app:
   university:
-    name: Université Paris 13
-    short-name: Paris 13
-    app-name: Sovereign IAM
+    name: Sorbonne Paris Nord
+    short-name: SPN
+    app-name: Portail des accès
 
   # Comma-separated list of allowed frontend origins
   cors:
